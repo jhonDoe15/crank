@@ -54,9 +54,16 @@ public class ExpressionParser {
     double parseTerm() {
         double x = parseNumber();
         for (;;) {
-            if (processChar('*')) x *= parseNumber(); // multiplication
-            else if (processChar('/')) x /= parseNumber(); // division
-            else return x;
+            boolean operatorFound = false;
+            for (char operator : operatorRegistry.getSpecialOperatorsSymbolsAsString().toCharArray()) {
+                if (processChar(operator))
+                {
+                    x = operatorRegistry.getOperator(operator).apply(x, parseNumber());
+                    operatorFound = true;
+                    break;
+                }
+            }
+            if (!operatorFound) return x;
         }
     }
 

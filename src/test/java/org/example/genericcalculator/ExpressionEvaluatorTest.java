@@ -1,10 +1,7 @@
 package org.example.genericcalculator;
 
 import org.example.genericcalculator.operators.OperatorRegistry;
-import org.example.genericcalculator.operators.types.AdditionOperator;
-import org.example.genericcalculator.operators.types.DivisionOperator;
-import org.example.genericcalculator.operators.types.MultiplicationOperator;
-import org.example.genericcalculator.operators.types.SubtractionOperator;
+import org.example.genericcalculator.operators.types.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -368,5 +365,42 @@ class ExpressionEvaluatorTest {
         String evaluationOutput = outContent.toString();
 
         assertEquals("(a=10,b=25,c=33,d=1075,e=105,l=120)\r\n", evaluationOutput);
+    }
+
+    @Test
+    void evaluateExpressions_newOperators() {
+
+        // reinitialize the registry
+        OperatorRegistry registry = new OperatorRegistry();
+        registry.registerOperator(new AdditionOperator());
+        registry.registerOperator(new SubtractionOperator());
+        registry.registerOperator(new MultiplicationOperator());
+        registry.registerOperator(new DivisionOperator());
+        registry.registerOperator(new PowerOperator());
+        expressionEvaluator = new ExpressionEvaluator(registry);
+        String[] inputs = {
+                "a = 5",
+                "b = a ^ 2",
+                "a = b + 15", // reassigning 'a' based on updated 'b'
+                "c = a * 2",
+                "c = c ^ 2", // 6400
+                "c = c / 2", // 3200
+                "c = c + a", // 3240
+                "c = c - b", // 3215
+                "c = c * 2", // 6430
+                "c = c / 3", // 2143.33 = 2143
+                "c = c + a", // 2183
+                "c = c - b", // 2158
+        };
+
+        for (String input : inputs) {
+            expressionEvaluator.evaluate(input);
+        }
+        expressionEvaluator.printVariables();
+        String evaluationOutput = outContent.toString();
+
+        assertTrue(evaluationOutput.contains("a=40"));
+        assertTrue(evaluationOutput.contains("b=25"));
+        assertTrue(evaluationOutput.contains("c=2158"));
     }
 }

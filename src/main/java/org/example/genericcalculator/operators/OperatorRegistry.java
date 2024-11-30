@@ -1,8 +1,8 @@
 package org.example.genericcalculator.operators;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class OperatorRegistry {
     private final Map<String, Operator> operators = new HashMap<>();
@@ -24,17 +24,13 @@ public class OperatorRegistry {
         return operators.containsKey(symbol);
     }
 
-    public Set<String> getOperatorsSymbols(){
-        return operators.keySet();
-    }
-
-    public String getOperatorsSymbolsAsString(){
-        return String.join("", operators.keySet());
-
-    }
-
     public String getOperatorsSymbolsForRegex(){
-        return getOperatorsSymbolsAsString().replace("-", "\\-"); // known characters to escape in regex
+        return String.join("", operators.keySet()).replace("-", "\\-"); // known characters to escape in regex
+    }
+
+    public String getSpecialOperatorsSymbolsAsString(){
+        List<String> highPrecedenceOperators = operators.values().stream().filter(op -> op.getPrecedence() > 1).map(Operator::getSymbol).toList();
+        return String.join("", highPrecedenceOperators);
     }
 }
 
