@@ -1,4 +1,4 @@
-# crank - multi expression calculator
+# crank - multi line expression calculator
 Our calculator supports multiple expressions one after the other with variable assignment in each expression, to either another expression or a literal value.
 default used implementation runs in serial mode as it's the fastest for most operations but for more complex expressions per line a dependency based multithreaded implementation is available.
 We recommend checking before commiting the to multithreaded one since for non-complex cases it can be 2-8x slower than the serial one.
