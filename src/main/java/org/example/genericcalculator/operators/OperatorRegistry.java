@@ -3,6 +3,7 @@ package org.example.genericcalculator.operators;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class OperatorRegistry {
     private final Map<String, Operator> operators = new HashMap<>();
@@ -25,7 +26,11 @@ public class OperatorRegistry {
     }
 
     public String getOperatorsSymbolsForRegex(){
-        return String.join("", operators.keySet()).replace("-", "\\-"); // known characters to escape in regex
+        return String.join("", getOperators()).replace("-", "\\-"); // known characters to escape in regex
+    }
+
+    public Set<String> getOperators(){
+        return operators.keySet();
     }
 
     public String getSpecialOperatorsSymbolsAsString(){

@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Math.*;
 import static java.lang.Math.round;
 
 public class ExpressionEvaluator {
+    Pattern variablePattern = Pattern.compile("^\\w+$");
+    Matcher matcher = variablePattern.matcher("");
     private final OperatorRegistry operatorRegistry;
     private final Map<String, Double> variables;
     private ExpressionParser expressionParser;
@@ -30,13 +31,21 @@ public class ExpressionEvaluator {
             return handleAssignment(expression);
         }
 
-        throw new IllegalArgumentException("Invalid expression format");
+        throw new MalformedExpression("Invalid expression format");
     }
 
     private double handleAssignment(String expression) {
         // Split expression into variable and value parts
         String[] parts = expression.split("=", 2);
         String variable = parts[0].trim();
+        if (operatorRegistry.getOperators().stream().anyMatch(variable::contains)){
+            variable = variable.substring(0, variable.length() - 1); // assuming operator length is 1 but the entire system relies on that assumption
+        }
+
+
+        if (!matcher.reset(variable).matches()) {
+            throw new MalformedExpression("Invalid variable name");
+        }
         String valueExpression = parts[1].trim();
 
         // Check for compound assignment
@@ -66,7 +75,7 @@ public class ExpressionEvaluator {
     public double calculateExpression(String expression) {
         // Replace variables with their values
         for (Map.Entry<String, Double> entry : variables.entrySet()) {
-            expression = expression.replace(entry.getKey(), String.valueOf(entry.getValue()));
+            expression = expression.replace(entry.getKey(), entry.getValue().toString());
         }
 
         double evaluatedExpression = evaluateExpression(expression);

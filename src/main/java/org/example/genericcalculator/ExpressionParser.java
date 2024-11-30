@@ -33,7 +33,7 @@ public class ExpressionParser {
     double parse() {
         nextChar();
         double x = parseExpression();
-        if (expressionPosition < expression.length()) throw new RuntimeException("Unexpected: " + (char)ch);
+        if (expressionPosition < expression.length()) throw new MalformedExpression("Unexpected: " + (char)ch);
         return x;
     }
 
@@ -80,7 +80,7 @@ public class ExpressionParser {
             while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
             parsedNumber = Double.parseDouble(expression.substring(startPos, this.expressionPosition));
         } else {
-            throw new RuntimeException("Unexpected: " + (char)ch);
+            throw new MalformedExpression("Unexpected: " + (char)ch);
         }
 
         return parsedNumber;
