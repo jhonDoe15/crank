@@ -1,5 +1,10 @@
-package org.example.negative_expression_nested_parenthesis_calculator;
+package org.example.genericcalculator;
 
+import org.example.genericcalculator.operators.OperatorRegistry;
+import org.example.genericcalculator.operators.types.AdditionOperator;
+import org.example.genericcalculator.operators.types.DivisionOperator;
+import org.example.genericcalculator.operators.types.MultiplicationOperator;
+import org.example.genericcalculator.operators.types.SubtractionOperator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +27,13 @@ class ExpressionEvaluatorTest {
 
     @BeforeEach
     public void setUpStreams() {
-        expressionEvaluator = new ExpressionEvaluator();
+        // Initialize the registry
+        OperatorRegistry registry = new OperatorRegistry();
+        registry.registerOperator(new AdditionOperator());
+        registry.registerOperator(new SubtractionOperator());
+        registry.registerOperator(new MultiplicationOperator());
+        registry.registerOperator(new DivisionOperator());
+        expressionEvaluator = new ExpressionEvaluator(registry);
         System.setOut(new PrintStream(outContent));
     }
 
