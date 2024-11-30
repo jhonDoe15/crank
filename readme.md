@@ -17,13 +17,13 @@ output example:
 ```
 
 # Off the bat improvements
-- from profiling the code, was key time-consuming part (14-18%) is the split operation on the assignment operator. From previous experience I'm confident that manual splitting of the expression is not a good idea. Handcrafted implementation could optimize that section by upto 70% in some cases. Other sections would require switching from the regex system to something custom with less background validations
-- currently in parentheses we support binary operations, but not serial ones (i.e. a + b + c). The current parser is already capable of handling this, but first we'd like to improve regex clarity, either by variable extraction to make building the regex easier\clearer or with a bigger change to the validation system
+- SOLVED: from profiling the code, was key time-consuming part (14-18%) is the split operation on the assignment operator. From previous experience I'm confident that manual splitting of the expression is not a good idea. Handcrafted implementation could optimize that section by upto 70% in some cases. Other sections would require switching from the regex system to something custom with less background validations
+- SOLVED: currently in parentheses we support binary operations, but not serial ones (i.e. a + b + c). The current parser is already capable of handling this, but first we'd like to improve regex clarity, either by variable extraction to make building the regex easier\clearer or with a bigger change to the validation system
 
 
 # Future roadmap
-- Support for more operators (unary operators on variables in expression side like '++' and '--')
-- Native support for negative numbers , currently requires minus operations to work but manageable (i.e. instead of '-10' you can use '0 - 10')
-- Validator support for multiple operations in parentheses (calculators already supports this)
+- SOLVED: Support for more operators (unary operators on variables in expression side like '++' and '--')
+- SOLVED: Native support for negative numbers , currently requires minus operations to work but manageable (i.e. instead of '-10' you can use '0 - 10')
+- SOLVED: Validator support for multiple operations in parentheses (calculators already supports this)
 - Better support for multi-threading and concurrency
 - Support for web development and APIs access
