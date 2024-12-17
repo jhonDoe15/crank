@@ -13,7 +13,6 @@ public class ExpressionParser {
         this.expression = expression;
     }
 
-    // Advances to the next character in the expression
     private void advanceToNextCharacter() {
         currentPosition++;
         currentCharacter = (currentPosition < expression.length())
@@ -28,7 +27,6 @@ public class ExpressionParser {
             advanceToNextCharacter();
         }
 
-        // Check and consume if matches
         if (currentCharacter == expectedCharacter) {
             advanceToNextCharacter();
             return true;
@@ -48,7 +46,6 @@ public class ExpressionParser {
         return result;
     }
 
-    // Handles addition and subtraction
     private double parseAddSubtractExpression() {
         double value = parseMultiplyDivideExpression();
 
@@ -63,14 +60,12 @@ public class ExpressionParser {
         }
     }
 
-    // Handles multiplication and division using operator registry
     private double parseMultiplyDivideExpression() {
         double value = parseNumberOrParenthesis();
 
         while (true) {
             boolean operatorFound = false;
 
-            // Check all registered operators
             for (char operator : operatorRegistry.getSpecialOperatorsSymbolsAsString().toCharArray()) {
                 if (matchAndConsumeCharacter(operator)) {
                     value = operatorRegistry.getOperator(operator).apply(value, parseNumberOrParenthesis());
@@ -85,9 +80,7 @@ public class ExpressionParser {
         }
     }
 
-    // Parses numbers, unary operators, and parenthesized expressions
     private double parseNumberOrParenthesis() {
-        // Handle unary plus and minus
         if (matchAndConsumeCharacter('+')) {
             return parseNumberOrParenthesis();
         }
@@ -95,18 +88,15 @@ public class ExpressionParser {
             return -parseNumberOrParenthesis();
         }
 
-        // Handle parenthesized expressions
         if (matchAndConsumeCharacter('(')) {
             double value = parseAddSubtractExpression();
             matchAndConsumeCharacter(')'); // Consume closing parenthesis
             return value;
         }
 
-        // Parse numeric values
         return parseNumericLiteral();
     }
 
-    // Extracts numeric literal from the expression
     private double parseNumericLiteral() {
         int startPosition = currentPosition;
 
@@ -115,7 +105,6 @@ public class ExpressionParser {
             advanceToNextCharacter();
         }
 
-        // Extract and parse the numeric substring
         String numericSubstring = expression.substring(startPosition, currentPosition);
 
         try {
@@ -125,7 +114,6 @@ public class ExpressionParser {
         }
     }
 
-    // Checks if a character is part of a number
     private boolean isPartOfNumber(char c) {
         return Character.isDigit(c) || c == '.';
     }
