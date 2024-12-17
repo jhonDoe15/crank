@@ -4,85 +4,129 @@ import org.example.genericcalculator.operators.OperatorRegistry;
 
 public class ExpressionParser {
     private final OperatorRegistry operatorRegistry;
-    int expressionPosition = -1, ch;
-    String expression;
+    private final String expression;
+    private int currentPosition = -1;
+    private char currentCharacter;
 
     public ExpressionParser(OperatorRegistry operatorRegistry, String expression) {
         this.operatorRegistry = operatorRegistry;
         this.expression = expression;
     }
 
-    void nextChar() {
-        expressionPosition++;
-        if (expressionPosition >= expression.length()) {
-            ch = -1;
-            return;
-        }
-        ch = expression.charAt(expressionPosition);
+    // Advances to the next character in the expression
+    private void advanceToNextCharacter() {
+        currentPosition++;
+        currentCharacter = (currentPosition < expression.length())
+                ? expression.charAt(currentPosition)
+                : (char) -1;
     }
 
-    boolean processChar(int charToProcess) {
-        while (ch == ' ') nextChar();
-        if (ch == charToProcess) {
-            nextChar();
+    // Skips whitespace and checks if the current character matches the expected one
+    private boolean matchAndConsumeCharacter(char expectedCharacter) {
+        // Skip whitespace
+        while (Character.isWhitespace(currentCharacter)) {
+            advanceToNextCharacter();
+        }
+
+        // Check and consume if matches
+        if (currentCharacter == expectedCharacter) {
+            advanceToNextCharacter();
             return true;
         }
         return false;
     }
 
-    double parse() {
-        nextChar();
-        double x = parseExpression();
-        if (expressionPosition < expression.length()) throw new MalformedExpression("Unexpected: " + (char)ch);
-        return x;
+    // Parses the entire expression
+    public double parse() {
+        advanceToNextCharacter();
+        double result = parseAddSubtractExpression();
+
+        // Ensure entire expression is consumed
+        if (currentPosition < expression.length()) {
+            throw new MalformedExpression("Unexpected character: " + currentCharacter);
+        }
+        return result;
     }
 
-    // Grammar:
-    // expression = term | expression `+` term | expression `-` term
-    // term = factor | term `*` factor | term `/` factor
-    // factor = `+` factor | `-` factor | number | `(` expression `)`
+    // Handles addition and subtraction
+    private double parseAddSubtractExpression() {
+        double value = parseMultiplyDivideExpression();
 
-    double parseExpression() {
-        double x = parseTerm();
-        for (;;) {
-            if (processChar('+')) x += parseTerm(); // addition
-            else if (processChar('-')) x -= parseTerm(); // subtraction
-            else return x;
+        while (true) {
+            if (matchAndConsumeCharacter('+')) {
+                value += parseMultiplyDivideExpression();
+            } else if (matchAndConsumeCharacter('-')) {
+                value -= parseMultiplyDivideExpression();
+            } else {
+                return value;
+            }
         }
     }
 
-    double parseTerm() {
-        double x = parseNumber();
-        for (;;) {
+    // Handles multiplication and division using operator registry
+    private double parseMultiplyDivideExpression() {
+        double value = parseNumberOrParenthesis();
+
+        while (true) {
             boolean operatorFound = false;
+
+            // Check all registered operators
             for (char operator : operatorRegistry.getSpecialOperatorsSymbolsAsString().toCharArray()) {
-                if (processChar(operator))
-                {
-                    x = operatorRegistry.getOperator(operator).apply(x, parseNumber());
+                if (matchAndConsumeCharacter(operator)) {
+                    value = operatorRegistry.getOperator(operator).apply(value, parseNumberOrParenthesis());
                     operatorFound = true;
                     break;
                 }
             }
-            if (!operatorFound) return x;
+
+            if (!operatorFound) {
+                return value;
+            }
         }
     }
 
-    double parseNumber() {
-        if (processChar('+')) return parseNumber(); // unary plus
-        if (processChar('-')) return -parseNumber(); // unary minus
-
-        double parsedNumber;
-        int startPos = this.expressionPosition;
-        if (processChar('(')) { // parentheses
-            parsedNumber = parseExpression();
-            processChar(')');
-        } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
-            while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-            parsedNumber = Double.parseDouble(expression.substring(startPos, this.expressionPosition));
-        } else {
-            throw new MalformedExpression("Unexpected: " + (char)ch);
+    // Parses numbers, unary operators, and parenthesized expressions
+    private double parseNumberOrParenthesis() {
+        // Handle unary plus and minus
+        if (matchAndConsumeCharacter('+')) {
+            return parseNumberOrParenthesis();
+        }
+        if (matchAndConsumeCharacter('-')) {
+            return -parseNumberOrParenthesis();
         }
 
-        return parsedNumber;
+        // Handle parenthesized expressions
+        if (matchAndConsumeCharacter('(')) {
+            double value = parseAddSubtractExpression();
+            matchAndConsumeCharacter(')'); // Consume closing parenthesis
+            return value;
+        }
+
+        // Parse numeric values
+        return parseNumericLiteral();
+    }
+
+    // Extracts numeric literal from the expression
+    private double parseNumericLiteral() {
+        int startPosition = currentPosition;
+
+        // Consume all characters that make up a number
+        while (isPartOfNumber(currentCharacter)) {
+            advanceToNextCharacter();
+        }
+
+        // Extract and parse the numeric substring
+        String numericSubstring = expression.substring(startPosition, currentPosition);
+
+        try {
+            return Double.parseDouble(numericSubstring);
+        } catch (NumberFormatException e) {
+            throw new MalformedExpression("Invalid number format: " + numericSubstring);
+        }
+    }
+
+    // Checks if a character is part of a number
+    private boolean isPartOfNumber(char c) {
+        return Character.isDigit(c) || c == '.';
     }
 }
